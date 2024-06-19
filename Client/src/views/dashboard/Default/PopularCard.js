@@ -16,9 +16,9 @@ import ChevronRightOutlinedIcon from '@material-ui/icons/ChevronRightOutlined';
 import MoreHorizOutlinedIcon from '@material-ui/icons/MoreHorizOutlined';
 import KeyboardArrowUpOutlinedIcon from '@material-ui/icons/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@material-ui/icons/KeyboardArrowDownOutlined';
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import CryptoPriceProvider from './CryptoPriceProvider';
-
+import { LocalLaundryServiceSharp } from '@material-ui/icons';
 
 // style constant
 const useStyles = makeStyles((theme) => ({
@@ -62,31 +62,21 @@ const useStyles = makeStyles((theme) => ({
 //-----------------------|| DASHBOARD DEFAULT - POPULAR CARD ||-----------------------//
 
 const PopularCard = ({ isLoading }) => {
-
-
     const classes = useStyles();
-    const [prices, setPrices] = useState({ btc: null, eth: null, xrp: null });
-    const cryptoPriceProvider = new CryptoPriceProvider();
-    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [error, setError] = useState(null);
 
+    const [priceData, setPriceData] = useState({});
+    // const [CryptoStatusPerDay, setCryptoStatusPerDay] = useState({});
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const cryptoIds = ['bitcoin', 'ethereum', 'ripple'];
 
     useEffect(() => {
-        async function fetchPrices() {
-            try {
-                const prices = await cryptoPriceProvider.getPrices(['bitcoin', 'ethereum', 'ripple']);
-                setPrices({
-                    btc: prices.bitcoin,
-                    eth: prices.ethereum,
-                    xrp: prices.ripple
-                });
-                console.log(prices);
-            } catch (error) {
-                console.error('Error fetching prices:', error);
-            }
-        }
-        fetchPrices();
-    }, []);
+        CryptoPriceProvider.getPriceData(cryptoIds)
 
+            .then((data) => setPriceData(data))
+            .catch((error) => setError('Failed to load price data'));
+    }, []);
+    console.log(priceData);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -144,162 +134,48 @@ const PopularCard = ({ isLoading }) => {
                             <Grid item xs={12} sx={{ pt: '16px !important' }}>
                                 <BajajAreaChartCard />
                             </Grid>
-                            <Grid item xs={12}>
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    BTC
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                        {prices.btc ? `$${prices.btc}` : 'Loading...'}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarSuccess}>
-                                                            <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.successDark}>
-                                            10% Profit
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    ETH
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                        {prices.eth ? `$${prices.eth}` : 'Loading...'}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarError}>
-                                                            <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
+                            {cryptoIds.map((id) => (
+                                <Grid item xs={12} key={id}>
+                                    {priceData[id] && priceData[id].usd ? (
+                                        <>
+                                            <Grid container direction="column">
+                                                <Grid item>
+                                                    <Grid container alignItems="center" justifyContent="space-between">
+                                                        <Grid item>
+                                                            <Typography variant="subtitle1" color="inherit">
+                                                                {id.toUpperCase()}
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Grid container alignItems="center" justifyContent="space-between">
+                                                                <Grid item>
+                                                                    <Typography variant="subtitle1" color="inherit">
+                                                                        ${priceData[id].usd.toFixed(2)}
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Avatar variant="rounded" className={classes.avatarSuccess}>
+                                                                        <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
+                                                                    </Avatar>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
                                                     </Grid>
                                                 </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.errorDark}>
-                                            10% loss
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    XRP
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                        {prices.xrp ? `$${prices.xrp}` : 'Loading...'}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarSuccess}>
-                                                            <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
+                                                <Grid item>
+                                                    <Typography variant="subtitle2" className={classes.successDark}>
+                                                        {priceData[id].usd_24h_change.toFixed(2)}%{' '}
+                                                        {priceData[id].usd_24h_change > 0 ? 'Profit' : 'Loss'}
+                                                    </Typography>
                                                 </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.successDark}>
-                                            10% Profit
-                                        </Typography>
-                                    </Grid>
+                                            <Divider className={classes.divider} />
+                                        </>
+                                    ) : (
+                                        'Loading...'
+                                    )}
                                 </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    TTML
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                            $189.00
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarError}>
-                                                            <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.errorDark}>
-                                            10% loss
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    Stolon
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                            $189.00
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarError}>
-                                                            <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.errorDark}>
-                                            10% loss
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Grid>
+                            ))}
                         </Grid>
                     </CardContent>
                     <CardActions className={classes.cardAction}>

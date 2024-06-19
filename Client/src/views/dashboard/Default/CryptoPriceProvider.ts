@@ -1,40 +1,21 @@
 import axios from 'axios';
 
-class CryptoPriceProvider {
-    private apiUrl: string;
-
-    constructor() {
-        this.apiUrl = 'https://api.coingecko.com/api/v3';
-    }
-
-    public async getPrices(symbols: string[]): Promise<{ [key: string]: number }> {
-        try {
-            console.log("salut");
-            
-            const response = await axios.get(`${this.apiUrl}/simple/price`, {
-                params: {
-                    ids: symbols.join(','),
-                    vs_currencies: 'usd'
-                }
-            });
-
-            const prices: { [key: string]: number } = {};
-            symbols.forEach(symbol => {
-                if (response.data[symbol] && response.data[symbol].usd) {
-                    prices[symbol] = response.data[symbol].usd;
-                } else {
-                    prices[symbol] = NaN; // Or handle missing prices as needed
-                }
-            });
-
-            console.log(prices);
-            
-            return prices;
-        } catch (error) {
-            console.error(`Failed to fetch prices:`, error);
-            throw new Error('Failed to fetch prices');
+const CryptoPriceProvider = {
+  getPriceData: async (cryptoIds:any) => {
+    try {
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+        params: {
+          ids: cryptoIds.join(','), // join the array of crypto IDs into a comma-separated string
+          vs_currencies: 'usd',
+          include_24hr_change: 'true'
         }
+      });
+      return response.data; // return the entire response data
+    } catch (error) {
+      console.error('Error fetching price data:', error);
+      throw error;
     }
-}
+  }
+};
 
 export default CryptoPriceProvider;
