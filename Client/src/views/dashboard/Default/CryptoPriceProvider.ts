@@ -7,7 +7,9 @@ const CryptoPriceProvider = {
         params: {
           ids: cryptoIds.join(','), // join the array of crypto IDs into a comma-separated string
           vs_currencies: 'usd',
-          include_24hr_change: 'true'
+          include_24hr_change: 'true',
+        include_last_updated_at: 'true'
+
         }
       });
       return response.data; // return the entire response data
@@ -15,7 +17,9 @@ const CryptoPriceProvider = {
       console.error('Error fetching price data:', error);
       throw error;
     }
-  }
+  },
+
+
 };
 
 export default CryptoPriceProvider;

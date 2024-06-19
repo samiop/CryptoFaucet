@@ -64,18 +64,47 @@ const useStyles = makeStyles((theme) => ({
 const PopularCard = ({ isLoading }) => {
     const classes = useStyles();
     const [error, setError] = useState(null);
+    const [marketData, setMarketData] = useState({});
 
     const [priceData, setPriceData] = useState({});
+    const [hourlyData, setHourlyChange] = useState({});
+    const [weeklyData, setWeeklyChange] = useState({});
     // const [CryptoStatusPerDay, setCryptoStatusPerDay] = useState({});
     const [anchorEl, setAnchorEl] = React.useState(null);
     const cryptoIds = ['bitcoin', 'ethereum', 'ripple'];
-
+const id =0;
     useEffect(() => {
         CryptoPriceProvider.getPriceData(cryptoIds)
 
             .then((data) => setPriceData(data))
             .catch((error) => setError('Failed to load price data'));
+
+            cryptoIds.forEach(id => {
+                CryptoPriceProvider.getMarketData(id)
+                  .then((data) => {
+                    setMarketData(prevData => ({
+                      ...prevData,
+                      [id]: data
+                    }));
+                  })
+                  .catch((error) => setError('Failed to load market data'));
+              });
     }, []);
+
+
+
+    const calculateImpact = (data, interval) => {
+        if (!data || data.prices.length === 0) return null;
+        const latestPrice = data.prices[data.prices.length - 1][1];
+        const pastPrice = interval === 'hourly' ? data.prices[data.prices.length - 2][1] : data.prices[0][1];
+        const impact = ((latestPrice - pastPrice) / pastPrice) * 100;
+        return impact.toFixed(2);
+      };
+
+
+
+
+    
     console.log(priceData);
 
     const handleClick = (event) => {
@@ -168,6 +197,18 @@ const PopularCard = ({ isLoading }) => {
                                                         {priceData[id].usd_24h_change > 0 ? 'Profit' : 'Loss'}
                                                     </Typography>
                                                 </Grid>
+                                                <Grid item>
+                  <Typography variant="subtitle2" color="inherit">
+                    Hourly Impact: 
+                    {marketData[id] ? calculateImpact(marketData[id], 'hourly') + '%' : 'Loading...'}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography variant="subtitle2" color="inherit">
+                    Weekly Impact: 
+                    {marketData[id] ? calculateImpact(marketData[id], 'weekly') + '%' : 'Loading...'}
+                  </Typography>
+                </Grid>
                                             </Grid>
                                             <Divider className={classes.divider} />
                                         </>
