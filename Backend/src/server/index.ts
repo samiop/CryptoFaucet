@@ -1,5 +1,4 @@
-import 'dotenv/config';
-
+import * as dotenv from 'dotenv';
 import compression from 'compression';
 import cors from 'cors';
 /*
@@ -15,6 +14,7 @@ import routes from '../routes/users';
 import sessionRoute from '../routes/session.route'
 import { connect } from './database';
 
+dotenv.config();
 // Instantiate express
 const server = express();
 server.use(compression());
