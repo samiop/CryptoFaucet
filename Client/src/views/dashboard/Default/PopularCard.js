@@ -16,6 +16,9 @@ import ChevronRightOutlinedIcon from '@material-ui/icons/ChevronRightOutlined';
 import MoreHorizOutlinedIcon from '@material-ui/icons/MoreHorizOutlined';
 import KeyboardArrowUpOutlinedIcon from '@material-ui/icons/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@material-ui/icons/KeyboardArrowDownOutlined';
+import  { useEffect, useState } from 'react';
+import CryptoPriceProvider from './CryptoPriceProvider';
+
 
 // style constant
 const useStyles = makeStyles((theme) => ({
@@ -59,9 +62,31 @@ const useStyles = makeStyles((theme) => ({
 //-----------------------|| DASHBOARD DEFAULT - POPULAR CARD ||-----------------------//
 
 const PopularCard = ({ isLoading }) => {
-    const classes = useStyles();
 
+
+    const classes = useStyles();
+    const [prices, setPrices] = useState({ btc: null, eth: null, xrp: null });
+    const cryptoPriceProvider = new CryptoPriceProvider();
     const [anchorEl, setAnchorEl] = React.useState(null);
+
+
+    useEffect(() => {
+        async function fetchPrices() {
+            try {
+                const prices = await cryptoPriceProvider.getPrices(['bitcoin', 'ethereum', 'ripple']);
+                setPrices({
+                    btc: prices.bitcoin,
+                    eth: prices.ethereum,
+                    xrp: prices.ripple
+                });
+                console.log(prices);
+            } catch (error) {
+                console.error('Error fetching prices:', error);
+            }
+        }
+        fetchPrices();
+    }, []);
+
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -82,7 +107,7 @@ const PopularCard = ({ isLoading }) => {
                             <Grid item xs={12}>
                                 <Grid container alignContent="center" justifyContent="space-between">
                                     <Grid item>
-                                        <Typography variant="h4">Popular Stocks</Typography>
+                                        <Typography variant="h4">Popular Cryptos</Typography>
                                     </Grid>
                                     <Grid item>
                                         <MoreHorizOutlinedIcon
@@ -108,6 +133,7 @@ const PopularCard = ({ isLoading }) => {
                                                 horizontal: 'right'
                                             }}
                                         >
+                                            <MenuItem onClick={handleClose}> This Hour</MenuItem>
                                             <MenuItem onClick={handleClose}> Today</MenuItem>
                                             <MenuItem onClick={handleClose}> This Month</MenuItem>
                                             <MenuItem onClick={handleClose}> This Year </MenuItem>
@@ -124,14 +150,14 @@ const PopularCard = ({ isLoading }) => {
                                         <Grid container alignItems="center" justifyContent="space-between">
                                             <Grid item>
                                                 <Typography variant="subtitle1" color="inherit">
-                                                    Bajaj Finery
+                                                    BTC
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
                                                 <Grid container alignItems="center" justifyContent="space-between">
                                                     <Grid item>
                                                         <Typography variant="subtitle1" color="inherit">
-                                                            $1839.00
+                                                        {prices.btc ? `$${prices.btc}` : 'Loading...'}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
@@ -155,14 +181,14 @@ const PopularCard = ({ isLoading }) => {
                                         <Grid container alignItems="center" justifyContent="space-between">
                                             <Grid item>
                                                 <Typography variant="subtitle1" color="inherit">
-                                                    TTML
+                                                    ETH
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
                                                 <Grid container alignItems="center" justifyContent="space-between">
                                                     <Grid item>
                                                         <Typography variant="subtitle1" color="inherit">
-                                                            $100.00
+                                                        {prices.eth ? `$${prices.eth}` : 'Loading...'}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
@@ -186,14 +212,14 @@ const PopularCard = ({ isLoading }) => {
                                         <Grid container alignItems="center" justifyContent="space-between">
                                             <Grid item>
                                                 <Typography variant="subtitle1" color="inherit">
-                                                    Reliance
+                                                    XRP
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
                                                 <Grid container alignItems="center" justifyContent="space-between">
                                                     <Grid item>
                                                         <Typography variant="subtitle1" color="inherit">
-                                                            $200.00
+                                                        {prices.xrp ? `$${prices.xrp}` : 'Loading...'}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
